@@ -103,7 +103,7 @@ export default function HeroSection() {
                                     <Button
                                         asChild
                                         size="lg"
-                                        className="h-12 rounded-full bg-indigo-600 text-base text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 border-0">
+                                        className="h-12 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-base text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-700 hover:to-purple-700 hover:shadow-indigo-500/40 border-0 transition-all duration-300">
                                         <Link href="/sign-up">
                                             <span className="text-nowrap">Start Learning</span>
                                             <ChevronRight className="ml-1" />
