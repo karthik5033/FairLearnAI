@@ -1,8 +1,9 @@
 'use client'
 import Link from 'next/link'
-import { Cpu, Fingerprint, Pencil, Settings2, Sparkles, Zap, ArrowRight, LucideIcon, CheckCircle2 } from 'lucide-react'
-import { motion, useMotionTemplate, useMotionValue } from 'motion/react'
+import { Cpu, Fingerprint, Pencil, Settings2, Sparkles, Zap, ArrowRight } from 'lucide-react'
+import { motion, useMotionTemplate, useMotionValue, useSpring } from 'motion/react'
 import { MouseEvent } from 'react'
+import React from 'react'
 
 const features = [
     {
@@ -74,10 +75,18 @@ const features = [
 ]
 
 function FeatureCard({ feature, index }: { feature: typeof features[0], index: number }) {
-    const mouseX = useMotionValue(0)
-    const mouseY = useMotionValue(0)
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+
+    // Tilt Values
+    const rotateX = useMotionValue(0);
+    const rotateY = useMotionValue(0);
     
-    // Fix: Hook must be called at the top level, not inside JSX
+    // Smooth spring animation
+    const springConfig = { damping: 20, stiffness: 300, mass: 0.5 };
+    const rotateXSpring = useSpring(rotateX, springConfig);
+    const rotateYSpring = useSpring(rotateY, springConfig);
+    
     const backgroundGradient = useMotionTemplate`
         radial-gradient(
           650px circle at ${mouseX}px ${mouseY}px,
@@ -87,85 +96,120 @@ function FeatureCard({ feature, index }: { feature: typeof features[0], index: n
     `
 
     function handleMouseMove({ currentTarget, clientX, clientY }: MouseEvent) {
-        const { left, top } = currentTarget.getBoundingClientRect()
-        mouseX.set(clientX - left)
-        mouseY.set(clientY - top)
+        const { left, top, width, height } = currentTarget.getBoundingClientRect();
+        
+        const x = clientX - left;
+        const y = clientY - top;
+        
+        mouseX.set(x);
+        mouseY.set(y);
+
+        // Calculate rotation
+        // Center of the element
+        const centerX = width / 2;
+        const centerY = height / 2;
+        
+        // Tilt intensity (degrees)
+        const intensity = 20;
+
+        // Calculate rotation based on distance from center
+        const rX = ((y - centerY) / centerY) * -intensity; // Invert X axis for natural tilt
+        const rY = ((x - centerX) / centerX) * intensity;
+
+        rotateX.set(rX);
+        rotateY.set(rY);
+    }
+
+    function handleMouseLeave() {
+        rotateX.set(0);
+        rotateY.set(0);
+        mouseX.set(0);
+        mouseY.set(0);
     }
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className={`group relative flex flex-col h-full border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 rounded-2xl p-5 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 overflow-hidden hover:shadow-lg hover:shadow-zinc-200/50`}
-            onMouseMove={handleMouseMove}
-        >
-            {/* Spotlight Gradient on Hover */}
+        <div style={{ perspective: "1200px" }} className="h-full">
             <motion.div
-                className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100 rounded-2xl"
-                style={{ background: backgroundGradient }}
-            />
-            
-            {/* Decorative Corner Accent - Smaller */}
-            <div 
-                className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-white/0 to-white/0 group-hover:from-[rgba(var(--feature-rgb),0.05)] transition-all duration-500 rounded-bl-3xl -mr-4 -mt-4 opacity-0 group-hover:opacity-100"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
                 style={{ 
-                    '--feature-rgb': feature.rgb 
-                } as React.CSSProperties}
-            />
+                    rotateX: rotateXSpring, 
+                    rotateY: rotateYSpring,
+                    transformStyle: "preserve-3d" 
+                }}
+                className="group relative flex flex-col h-full border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 rounded-2xl p-5 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors duration-300 overflow-hidden hover:shadow-xl hover:shadow-zinc-200/50"
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+            >
+                {/* Spotlight Gradient on Hover */}
+                <motion.div
+                    className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100 rounded-2xl z-0"
+                    style={{ background: backgroundGradient }}
+                />
+                
+                {/* Decorative Corner Accent */}
+                <div 
+                    className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-white/0 to-white/0 group-hover:from-[rgba(var(--feature-rgb),0.05)] transition-all duration-500 rounded-bl-3xl -mr-4 -mt-4 opacity-0 group-hover:opacity-100 z-0"
+                    style={{ 
+                        '--feature-rgb': feature.rgb 
+                    } as React.CSSProperties}
+                />
 
-            {/* Inner Grid Pattern */}
-            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+                {/* Inner Grid Pattern */}
+                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:24px_24px] z-0"></div>
 
-            <div className="relative z-10 flex flex-col h-full">
-                <div className="flex items-start justify-between mb-3">
-                     <div className={`inline-flex w-fit rounded-xl bg-zinc-50 dark:bg-zinc-800/50 p-2.5 shadow-sm ring-1 ring-inset ring-zinc-200 dark:ring-zinc-800 ${feature.iconColor}`}>
-                        <feature.icon className="h-5 w-5 transition-transform duration-500 group-hover:rotate-[10deg] group-hover:scale-110" />
+                {/* Content Container - Pushed forward in 3D space */}
+                <div className="relative z-10 flex flex-col h-full" style={{ transform: "translateZ(50px)" }}>
+                    <div className="flex items-start justify-between mb-3">
+                         <div className={`inline-flex w-fit rounded-xl bg-zinc-50 dark:bg-zinc-800/50 p-2.5 shadow-sm ring-1 ring-inset ring-zinc-200 dark:ring-zinc-800 ${feature.iconColor}`}>
+                            <feature.icon className="h-5 w-5 transition-transform duration-500 group-hover:rotate-[10deg] group-hover:scale-110" />
+                        </div>
+                    </div>
+                   
+                    <h3 className="text-lg font-semibold leading-tight text-zinc-900 dark:text-zinc-50 mb-1">
+                        {feature.title}
+                    </h3>
+                    <p className="text-xs leading-5 text-zinc-500 dark:text-zinc-400 mb-4 line-clamp-2">
+                        {feature.description}
+                    </p>
+
+                    {/* Benefits Badges */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        {feature.benefits?.map((benefit, i) => (
+                            <span 
+                                key={i}
+                                className="inline-flex items-center rounded-md bg-zinc-50 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold text-zinc-500 ring-1 ring-inset ring-zinc-200 transition-colors duration-300 group-hover:bg-[rgba(var(--feature-rgb),0.05)] group-hover:text-[rgb(var(--feature-rgb))] group-hover:ring-[rgba(var(--feature-rgb),0.2)]"
+                                style={{ 
+                                    '--feature-rgb': feature.rgb 
+                                } as React.CSSProperties}
+                            >
+                                {benefit}
+                            </span>
+                        ))}
+                    </div>
+
+                    <div className="mt-auto">
+                        <Link href={feature.href} passHref className="block w-full">
+                            <motion.div 
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                style={{ 
+                                    '--hover-bg': `rgba(${feature.rgb}, 0.1)`, 
+                                    '--hover-text': `rgb(${feature.rgb})`, 
+                                    '--hover-border': `rgba(${feature.rgb}, 0.2)` 
+                                } as React.CSSProperties}
+                                className="group/btn inline-flex items-center justify-center rounded-lg bg-zinc-50 border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 transition-all duration-300 hover:bg-[var(--hover-bg)] hover:text-[var(--hover-text)] hover:border-[var(--hover-border)] cursor-pointer w-full shadow-sm hover:shadow-md"
+                            >
+                                <span>Learn More</span>
+                                <ArrowRight className="ml-1.5 h-3 w-3 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                            </motion.div>
+                        </Link>
                     </div>
                 </div>
-               
-                <h3 className="text-lg font-semibold leading-tight text-zinc-900 dark:text-zinc-50 mb-1">
-                    {feature.title}
-                </h3>
-                <p className="text-xs leading-5 text-zinc-500 dark:text-zinc-400 mb-4 line-clamp-2">
-                    {feature.description}
-                </p>
-
-                {/* Benefits Badges - Compact */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                    {feature.benefits?.map((benefit, i) => (
-                        <span 
-                            key={i}
-                            className="inline-flex items-center rounded-md bg-zinc-50 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold text-zinc-500 ring-1 ring-inset ring-zinc-200 transition-colors duration-300 group-hover:bg-[rgba(var(--feature-rgb),0.05)] group-hover:text-[rgb(var(--feature-rgb))] group-hover:ring-[rgba(var(--feature-rgb),0.2)]"
-                            style={{ 
-                                '--feature-rgb': feature.rgb 
-                            } as React.CSSProperties}
-                        >
-                            {benefit}
-                        </span>
-                    ))}
-                </div>
-
-                <div className="mt-auto">
-                    <Link href={feature.href} passHref className="block w-full">
-                        <motion.div 
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            style={{ 
-                                '--hover-bg': `rgba(${feature.rgb}, 0.1)`, 
-                                '--hover-text': `rgb(${feature.rgb})`, 
-                                '--hover-border': `rgba(${feature.rgb}, 0.2)` 
-                            } as React.CSSProperties}
-                            className="group/btn inline-flex items-center justify-center rounded-lg bg-zinc-50 border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 transition-all duration-300 hover:bg-[var(--hover-bg)] hover:text-[var(--hover-text)] hover:border-[var(--hover-border)] cursor-pointer w-full"
-                        >
-                            <span>Learn More</span>
-                            <ArrowRight className="ml-1.5 h-3 w-3 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                        </motion.div>
-                    </Link>
-                </div>
-            </div>
-        </motion.div>
+            </motion.div>
+        </div>
     )
 }
 
@@ -194,7 +238,7 @@ export default function Features() {
                     </motion.div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {features.map((feature, index) => (
                         <FeatureCard key={index} feature={feature} index={index} />
                     ))}
@@ -203,4 +247,3 @@ export default function Features() {
         </section>
     )
 }
-
