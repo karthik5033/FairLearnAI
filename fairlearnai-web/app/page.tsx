@@ -3,6 +3,7 @@ import Features from "@/components/features-4";
 import StatsSection from "@/components/stats-4";
 import ContentSection from "@/components/content-2";
 import Pricing from "@/components/pricing";
+import AboutSection from "@/components/about-section";
 import FooterSection from "@/components/footer";
 import IntegrationsSection from "@/components/integrations-1";
 
@@ -15,6 +16,7 @@ export default function Home() {
       <StatsSection />
       <IntegrationsSection />
       <Pricing />
+      <AboutSection />
       <FooterSection />
     </div>
   );
