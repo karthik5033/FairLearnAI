@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, Variants } from "framer-motion"
 import Link from 'next/link'
 import { 
     Search,
@@ -20,7 +20,7 @@ import { TeacherAssignmentsTab } from "@/components/teacher-dashboard/assignment
 import { TeacherSettingsTab } from "@/components/teacher-dashboard/settings-tab"
 
 // Animation Variants
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { 
         opacity: 1,
@@ -31,7 +31,7 @@ const containerVariants = {
     }
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0, scale: 0.98 },
     visible: { 
         y: 0, 
