@@ -81,8 +81,8 @@ export default function HeroSection() {
                                 loop
                                 muted
                                 playsInline
-                                className="size-full object-cover"
-                                src="https://ik.imagekit.io/lrigu76hy/tailark/dna-video.mp4?updatedAt=1745736251477"></video>
+                                src="https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4"></video>
+                            <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-b from-transparent via-slate-950/90 to-slate-950 z-20 pointer-events-none" />
                         </div>
 
                         <div className="relative z-10 mx-auto flex max-w-7xl flex-col px-6 text-white lg:block lg:px-12">
