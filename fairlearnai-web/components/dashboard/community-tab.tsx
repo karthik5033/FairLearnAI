@@ -1,12 +1,11 @@
 import React from "react"
-import { motion } from "framer-motion"
+import { motion, Variants } from "framer-motion"
 import { 
     MessageSquare, 
     Heart, 
     Share2, 
     MoreHorizontal,
     Search,
-    hash,
     Hash,
     Trophy,
     Medal
@@ -49,7 +48,7 @@ const leaderboard = [
     { rank: 5, name: "Tom H.", points: 980, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tom", trend: "up" },
 ]
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0, scale: 0.98 },
     visible: { 
         y: 0, 

@@ -1,8 +1,11 @@
 'use client'
 
+import { Suspense } from "react"
+
 import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence, Variants } from "framer-motion"
 import Link from 'next/link'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { 
     Search,
     Bell,
@@ -41,10 +44,21 @@ const itemVariants: Variants = {
     }
 }
 
-export default function TeacherDashboardPage() {
+function TeacherDashboardContent() {
     const [focusMode, setFocusMode] = useState(false)
     const [mounted, setMounted] = useState(false)
-    const [activeTab, setActiveTab] = useState("overview")
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    
+    // Initialize tab from URL or default to 'overview'
+    const activeTab = searchParams.get('tab') || 'overview'
+
+    // Function to update URL without full reload
+    const setActiveTab = (tab: string) => {
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('tab', tab)
+        router.push(`?${params.toString()}`, { scroll: false })
+    }
 
     useEffect(() => {
         setMounted(true)
@@ -54,8 +68,8 @@ export default function TeacherDashboardPage() {
 
     return (
         <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pb-20 relative overflow-hidden">
-            
-            {/* Ambient Background Pattern */}
+            {/* ... keep existing JSX ... */}
+             {/* Ambient Background Pattern */}
             <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-60" />
 
             {/* Header */}
@@ -213,5 +227,13 @@ export default function TeacherDashboardPage() {
                 </AnimatePresence>
             </motion.main>
         </div>
+    )
+}
+
+export default function TeacherDashboardPage() {
+    return (
+        <Suspense fallback={null}>
+            <TeacherDashboardContent />
+        </Suspense>
     )
 }

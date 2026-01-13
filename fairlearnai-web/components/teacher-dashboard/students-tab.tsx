@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, Variants } from "framer-motion"
 import { 
     Search, 
     MoreHorizontal, 
@@ -33,8 +33,9 @@ import {
     TableHeader, 
     TableRow 
 } from "@/components/ui/table"
+import Link from "next/link"
 
-const statsVariants = {
+const statsVariants:Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
         opacity: 1, 
@@ -110,9 +111,11 @@ export function TeacherStudentsTab() {
                         <Button variant="outline" className="rounded-xl border-slate-200 text-slate-600 font-bold">
                             <Filter className="w-4 h-4 mr-2" /> Filter
                         </Button>
-                         <Button className="rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">
-                             Add Student
-                        </Button>
+                         <Link href="/teacher/students/add">
+                             <Button className="rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">
+                                 Add Student
+                            </Button>
+                        </Link>
                     </div>
                 </div>
 
@@ -132,12 +135,15 @@ export function TeacherStudentsTab() {
                             {filteredStudents.map((student) => (
                                 <TableRow key={student.id} className="hover:bg-slate-50/50 border-slate-100">
                                     <TableCell className="pl-6 py-4">
+
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs">
                                                 {student.avatar}
                                             </div>
                                             <div>
-                                                <p className="font-bold text-slate-900">{student.name}</p>
+                                                <Link href={`/teacher/students/${student.id}`}>
+                                                    <p className="font-bold text-slate-900 hover:text-emerald-600 transition-colors cursor-pointer">{student.name}</p>
+                                                </Link>
                                                 <p className="text-xs text-slate-500 font-medium">{student.email}</p>
                                             </div>
                                         </div>
@@ -177,9 +183,11 @@ export function TeacherStudentsTab() {
                                           </DropdownMenuTrigger>
                                           <DropdownMenuContent align="end" className="rounded-xl border-slate-100 shadow-xl">
                                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                            <DropdownMenuItem className="gap-2 font-medium">
-                                                <FileText className="w-4 h-4 text-slate-400" /> View Profile
-                                            </DropdownMenuItem>
+                                            <Link href={`/teacher/students/${student.id}`}>
+                                                <DropdownMenuItem className="gap-2 font-medium cursor-pointer">
+                                                    <FileText className="w-4 h-4 text-slate-400" /> View Profile
+                                                </DropdownMenuItem>
+                                            </Link>
                                             <DropdownMenuItem className="gap-2 font-medium">
                                                 <Mail className="w-4 h-4 text-slate-400" /> Email Student
                                             </DropdownMenuItem>

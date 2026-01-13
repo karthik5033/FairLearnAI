@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { motion } from "framer-motion"
+import { motion,Variants } from "framer-motion"
 import { 
     Clock, 
     Play, 
@@ -34,8 +34,9 @@ import {
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 
-const itemVariants = {
+const itemVariants:Variants = {
     hidden: { y: 20, opacity: 0, scale: 0.98 },
     visible: { 
         y: 0, 
@@ -79,9 +80,9 @@ export function TeacherOverviewTab() {
                                 <button className="flex items-center gap-2 bg-emerald-500 text-white px-6 py-3.5 rounded-xl font-bold text-sm shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:bg-emerald-600 hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5 transition-all active:scale-95">
                                     Review Flags <Eye className="w-4 h-4" />
                                 </button>
-                                <button className="px-6 py-3.5 rounded-xl font-bold text-sm text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
+                                <Link href="/teacher/dashboard?tab=settings" className="px-6 py-3.5 rounded-xl font-bold text-sm text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors inline-block">
                                     Class Settings
-                                </button>
+                                </Link>
                             </div>
                         </div>
 
@@ -204,12 +205,21 @@ export function TeacherOverviewTab() {
                         { label: "Reports", icon: Activity, color: "text-sky-600 bg-sky-50" },
                         { label: "Support", icon: Bot, color: "text-slate-600 bg-slate-50" },
                     ].map((action, i) => (
-                        <button key={i} className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-100 hover:bg-emerald-50/30 transition-all group">
+                        <Link 
+                            key={i} 
+                            href={`/teacher/dashboard?tab=${
+                                action.label === "Update Rules" ? "settings" :
+                                action.label === "Student List" ? "students" :
+                                action.label === "Reports" ? "assignments" :
+                                "overview"
+                            }`}
+                            className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-100 hover:bg-emerald-50/30 transition-all group"
+                        >
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${action.color} group-hover:scale-110 transition-transform`}>
                                 <action.icon className="w-5 h-5" />
                             </div>
                             <span className="text-xs font-bold text-slate-700">{action.label}</span>
-                        </button>
+                        </Link>
                     ))}
                 </div>
 
@@ -254,7 +264,7 @@ export function TeacherOverviewTab() {
                 >
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-slate-900">Top Learners</h3>
-                        <button className="text-xs text-emerald-600 font-bold hover:underline">View All</button>
+                        <Link href="/teacher/dashboard?tab=students" className="text-xs text-emerald-600 font-bold hover:underline">View All</Link>
                     </div>
                     <div className="space-y-4">
                         {[

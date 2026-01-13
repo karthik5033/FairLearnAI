@@ -1,5 +1,5 @@
 import React from "react"
-import { motion } from "framer-motion"
+import { motion, Variants } from "framer-motion"
 import { 
     Play, 
     Clock, 
@@ -82,7 +82,7 @@ const exploreCourses = [
     },
 ]
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0, scale: 0.98 },
     visible: { 
         y: 0, 

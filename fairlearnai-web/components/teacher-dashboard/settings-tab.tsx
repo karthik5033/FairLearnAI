@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { motion } from "framer-motion"
+import { motion, Variants } from "framer-motion"
 import { 
   Shield, 
   Lock, 
@@ -37,7 +37,7 @@ const containerVariants = {
     }
 }
 
-const sectionVariants = {
+const sectionVariants:Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: { 
         y: 0, 

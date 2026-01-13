@@ -9,7 +9,8 @@ import {
     FileText, 
     Upload, 
     CheckCircle2,
-    BookOpen
+    BookOpen,
+    Save
 } from "lucide-react"
 import Link from "next/link"
 import { TeacherHeader } from "@/components/teacher-dashboard/header"
@@ -19,8 +20,27 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+export default function EditAssignmentPage({ params }: { params: { id: string } }) {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
+    
+    // Mock existing data
+    const [formData, setFormData] = useState({
+        title: "Ethics in AI: Case Study Analysis",
+        course: "cs305",
+        description: "Analyze the provided case study regarding autonomous vehicle decision making. Discuss the ethical implications using the frameworks covered in class.",
+        dueDate: "2024-10-24",
+        points: "100"
+    })
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { id, value } = e.target
+        setFormData(prev => ({ ...prev, [id]: value }))
+    }
+
+    const handleSelectChange = (value: string) => {
+        setFormData(prev => ({ ...prev, course: value }))
+    }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -28,9 +48,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
         // Simulate API call
         setTimeout(() => {
             setIsLoading(false)
-            // Redirect to the new assignment details (mock ID '1')
-            router.push('/teacher/assignments/1')
-        }, 2000)
+            // Redirect back to assignment details
+            router.push(`/teacher/assignments/${params.id}`)
+        }, 1500)
     }
 
     return (
@@ -47,12 +67,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                 transition={{ duration: 0.5 }}
             >
                 <div className="mb-8">
-                    <Link href="/teacher/dashboard" className="inline-flex items-center text-slate-500 hover:text-slate-900 font-bold text-sm mb-4 transition-colors">
+                    <Link href={`/teacher/assignments/${params.id}`} className="inline-flex items-center text-slate-500 hover:text-slate-900 font-bold text-sm mb-4 transition-colors">
                         <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Dashboard
+                        Back to Assignment
                     </Link>
-                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Create New Assignment</h1>
-                    <p className="text-slate-500 font-medium">Set up a new task, quiz, or project for your class.</p>
+                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Edit Assignment</h1>
+                    <p className="text-slate-500 font-medium">Update assignment details and settings.</p>
                 </div>
 
                 <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl p-8">
@@ -67,12 +87,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="title" className="text-slate-700 font-bold">Assignment Title</Label>
-                                    <Input id="title" placeholder="e.g. Ethics in AI Case Study" className="rounded-xl border-slate-200 focus:ring-emerald-500/20" required />
+                                    <Input 
+                                        id="title" 
+                                        value={formData.title} 
+                                        onChange={handleChange}
+                                        placeholder="e.g. Ethics in AI Case Study" 
+                                        className="rounded-xl border-slate-200 focus:ring-emerald-500/20" 
+                                        required 
+                                    />
                                 </div>
                                 
                                 <div className="space-y-2">
                                     <Label htmlFor="course" className="text-slate-700 font-bold">Course</Label>
-                                    <Select>
+                                    <Select value={formData.course} onValueChange={handleSelectChange}>
                                         <SelectTrigger className="rounded-xl border-slate-200 focus:ring-emerald-500/20">
                                             <SelectValue placeholder="Select a course" />
                                         </SelectTrigger>
@@ -89,6 +116,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                                 <Label htmlFor="description" className="text-slate-700 font-bold">Description & Instructions</Label>
                                 <Textarea 
                                     id="description" 
+                                    value={formData.description}
+                                    onChange={handleChange}
                                     placeholder="Provide detailed instructions for the assignment..." 
                                     className="min-h-[150px] rounded-xl border-slate-200 focus:ring-emerald-500/20 resize-none leading-relaxed" 
                                 />
@@ -104,11 +133,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="dueDate" className="text-slate-700 font-bold">Due Date</Label>
-                                    <Input id="dueDate" type="date" className="rounded-xl border-slate-200 focus:ring-emerald-500/20 w-full block" required />
+                                    <Input 
+                                        id="dueDate" 
+                                        type="date" 
+                                        value={formData.dueDate}
+                                        onChange={handleChange}
+                                        className="rounded-xl border-slate-200 focus:ring-emerald-500/20 w-full block" 
+                                        required 
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="points" className="text-slate-700 font-bold">Total Points</Label>
-                                    <Input id="points" type="number" placeholder="100" className="rounded-xl border-slate-200 focus:ring-emerald-500/20" />
+                                    <Input 
+                                        id="points" 
+                                        type="number" 
+                                        value={formData.points}
+                                        onChange={handleChange}
+                                        placeholder="100" 
+                                        className="rounded-xl border-slate-200 focus:ring-emerald-500/20" 
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -119,19 +162,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                                 Resources
                             </h2>
                             
-                            <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 hover:border-emerald-200 transition-colors group">
-                                <div className="w-12 h-12 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center mb-3 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
-                                    <Upload className="w-6 h-6" />
+                            <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4">
+                                <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-rose-500 shadow-sm">
+                                    <FileText className="w-5 h-5" />
                                 </div>
-                                <p className="text-sm font-bold text-slate-900">Click to upload files</p>
-                                <p className="text-xs text-slate-500 mt-1">PDF, DOCX, or ZIP up to 10MB</p>
+                                <div className="flex-1">
+                                    <p className="text-sm font-bold text-slate-900">CaseStudy.pdf</p>
+                                    <p className="text-xs text-slate-500">2.4 MB • Uploaded 2 days ago</p>
+                                </div>
+                                <Button type="button" variant="ghost" size="sm" className="text-rose-500 hover:text-rose-700 hover:bg-rose-50">
+                                    Remove
+                                </Button>
+                            </div>
+
+                            <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 hover:border-emerald-200 transition-colors group">
+                                <div className="w-10 h-10 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center mb-2 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                                    <Upload className="w-5 h-5" />
+                                </div>
+                                <p className="text-xs font-bold text-slate-900">Upload more files</p>
                             </div>
                         </div>
 
                         <div className="pt-4 flex items-center justify-end gap-4">
-                            <Button type="button" variant="outline" className="rounded-xl border-slate-200 font-bold text-slate-600">
-                                Cancel
-                            </Button>
+                            <Link href={`/teacher/assignments/${params.id}`}>
+                                <Button type="button" variant="outline" className="rounded-xl border-slate-200 font-bold text-slate-600">
+                                    Cancel
+                                </Button>
+                            </Link>
                             <Button type="submit" className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-600/20 min-w-[150px]" disabled={isLoading}>
                                 {isLoading ? (
                                     <span className="flex items-center gap-2">
@@ -140,11 +197,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                                             transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                                             className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                                         />
-                                        Creating...
+                                        Saving...
                                     </span>
                                 ) : (
                                     <span className="flex items-center gap-2">
-                                        <CheckCircle2 className="w-4 h-4" /> Create Assignment
+                                        <Save className="w-4 h-4" /> Save Changes
                                     </span>
                                 )}
                             </Button>

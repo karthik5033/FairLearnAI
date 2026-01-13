@@ -90,12 +90,16 @@ export default function AssignmentDetailsPage({ params }: { params: { id: string
                         </div>
 
                         <div className="flex gap-3">
-                            <Button variant="outline" className="rounded-xl border-slate-200 font-bold text-slate-600">
-                                Edit Assignment
-                            </Button>
-                            <Button className="rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 shadow-lg shadow-slate-900/20">
-                                Grade Submissions
-                            </Button>
+                            <Link href={`/teacher/assignments/${params.id}/edit`}>
+                                <Button variant="outline" className="rounded-xl border-slate-200 font-bold text-slate-600">
+                                    Edit Assignment
+                                </Button>
+                            </Link>
+                            <Link href={`/teacher/assignments/${params.id}/grade`}>
+                                <Button className="rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 shadow-lg shadow-slate-900/20">
+                                    Grade Submissions
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>

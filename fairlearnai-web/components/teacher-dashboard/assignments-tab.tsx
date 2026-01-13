@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -84,10 +85,12 @@ export function TeacherAssignmentsTab() {
                      <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Assignments</h2>
                      <p className="text-slate-500 font-medium">Create and manage coursework for your classes.</p>
                 </div>
-                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20 font-bold">
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Assignment
-                </Button>
+                <Link href="/teacher/assignments/create">
+                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20 font-bold">
+                        <Plus className="w-4 h-4 mr-2" />
+                        New Assignment
+                    </Button>
+                </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -154,26 +157,30 @@ export function TeacherAssignmentsTab() {
                                 </div>
                             )}
 
-                            <Button variant="outline" className="w-full mt-4 rounded-xl border-slate-200 font-bold text-slate-600 hover:text-slate-900 hover:border-slate-300">
-                                Manage <ArrowRight className="w-4 h-4 ml-2" />
-                            </Button>
+                            <Link href={`/teacher/assignments/${assignment.id}`}>
+                                <Button variant="outline" className="w-full mt-4 rounded-xl border-slate-200 font-bold text-slate-600 hover:text-slate-900 hover:border-slate-300">
+                                    Manage <ArrowRight className="w-4 h-4 ml-2" />
+                                </Button>
+                            </Link>
                         </div>
                     </motion.div>
                 ))}
 
                 {/* Create New Placeholder Card */}
-                <motion.button 
-                    variants={itemVariants}
-                    className="rounded-[2rem] border-2 border-dashed border-slate-200 p-6 flex flex-col items-center justify-center text-center gap-4 hover:bg-slate-50 hover:border-emerald-200 transition-all group h-full min-h-[300px]"
-                >
-                    <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
-                        <Plus className="w-8 h-8" />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-bold text-slate-900">Create Assignment</h3>
-                        <p className="text-sm font-medium text-slate-500">Set up a new task or quiz</p>
-                    </div>
-                </motion.button>
+                <Link href="/teacher/assignments/create" className="h-full">
+                    <motion.button 
+                        variants={itemVariants}
+                        className="w-full h-full rounded-[2rem] border-2 border-dashed border-slate-200 p-6 flex flex-col items-center justify-center text-center gap-4 hover:bg-slate-50 hover:border-emerald-200 transition-all group min-h-[300px]"
+                    >
+                        <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                            <Plus className="w-8 h-8" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-900">Create Assignment</h3>
+                            <p className="text-sm font-medium text-slate-500">Set up a new task or quiz</p>
+                        </div>
+                    </motion.button>
+                </Link>
             </div>
         </motion.div>
     )

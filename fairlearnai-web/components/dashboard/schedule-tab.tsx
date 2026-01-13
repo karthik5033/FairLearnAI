@@ -1,5 +1,5 @@
 import React from "react"
-import { motion } from "framer-motion"
+import { motion, Variants } from "framer-motion"
 import { 
     Calendar as CalendarIcon, 
     Clock, 
@@ -50,7 +50,7 @@ const upcomingItems = [
      { day: "Thursday", date: "Oct 26", title: "Mid-Term Review", type: "Event", color: "emerald" },
 ]
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0, scale: 0.98 },
     visible: { 
         y: 0, 
