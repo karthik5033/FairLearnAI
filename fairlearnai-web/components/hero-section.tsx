@@ -103,7 +103,7 @@ export default function HeroSection() {
                                     <Button
                                         asChild
                                         size="lg"
-                                        className="h-12 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-base text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-700 hover:to-purple-700 hover:shadow-indigo-500/40 border-0 transition-all duration-300">
+                                        className="h-12 rounded-full bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-base font-semibold text-white shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:shadow-[0_0_30px_rgba(168,85,247,0.7)] hover:brightness-110 border-t border-white/20 transition-all duration-300">
                                         <Link href="/sign-up">
                                             <span className="text-nowrap">Start Learning</span>
                                             <ChevronRight className="ml-1" />
@@ -114,7 +114,7 @@ export default function HeroSection() {
                                         asChild
                                         size="lg"
                                         variant="ghost"
-                                        className="h-12 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm px-5 text-base text-white hover:bg-white/10 hover:text-white">
+                                        className="h-12 rounded-full border border-white/50 bg-white/10 backdrop-blur-md px-6 text-base font-medium text-white hover:bg-white/20 hover:text-white hover:border-white/80 transition-all duration-300">
                                         <Link href="#features">
                                             <span className="text-nowrap">Request a demo</span>
                                         </Link>
