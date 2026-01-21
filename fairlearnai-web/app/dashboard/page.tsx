@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, Variants } from "framer-motion"
 import { 
     Search,
     Bell,
@@ -12,10 +12,12 @@ import { OverviewTab } from "@/components/dashboard/overview-tab"
 import { CoursesTab } from "@/components/dashboard/courses-tab"
 import { ScheduleTab } from "@/components/dashboard/schedule-tab"
 import { CommunityTab } from "@/components/dashboard/community-tab"
+import { GamificationTab } from "@/components/dashboard/gamification-tab"
+
 import { Logo } from "@/components/logo"
 
 // Animation Variants
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { 
         opacity: 1,
@@ -26,7 +28,7 @@ const containerVariants = {
     }
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0, scale: 0.98 },
     visible: { 
         y: 0, 
@@ -166,7 +168,8 @@ export default function DashboardPage() {
                             </p>
                         </div>
                         <div className="flex gap-2 p-1 bg-slate-50/80 backdrop-blur-sm rounded-xl border border-slate-100 overflow-x-auto shadow-sm">
-                            {["overview", "courses", "schedule", "community"].map((tab) => (
+                            {["overview", "courses", "gamification", "schedule", "community"].map((tab) => (
+
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
@@ -199,8 +202,10 @@ export default function DashboardPage() {
                     >
                         {activeTab === 'overview' && <OverviewTab />}
                         {activeTab === 'courses' && <CoursesTab />}
+                        {activeTab === 'gamification' && <GamificationTab />}
                         {activeTab === 'schedule' && <ScheduleTab />}
                         {activeTab === 'community' && <CommunityTab />}
+
                     </motion.div>
                 </AnimatePresence>
             </motion.main>
