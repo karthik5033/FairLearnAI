@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState, useEffect } from "react"
 import { motion, Variants } from "framer-motion"
 import { 
     Plus, 
@@ -15,6 +15,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 
 const containerVariants: Variants = {
@@ -36,50 +42,66 @@ const itemVariants: Variants = {
     }
 }
 
-const assignments = [
-    {
-        id: "1",
-        title: "Ethics in AI: Case Study Analysis",
-        course: "CS 305: Ethics",
-        dueDate: "Oct 24, 2024",
-        status: "Active",
-        submissions: 24,
-        total: 28,
-        avgScore: null,
-        daysLeft: 2,
-    },
-    {
-        id: "2",
-        title: "Neural Networks Implementation",
-        course: "CS 410: Deep Learning",
-        dueDate: "Oct 20, 2024",
-        status: "Grading",
-        submissions: 28,
-        total: 28,
-        avgScore: 88,
-        daysLeft: 0,
-    },
-    {
-        id: "3",
-        title: "Mid-Term Project Proposal",
-        course: "CS 305: Ethics",
-        dueDate: "Oct 15, 2024",
-        status: "Completed",
-        submissions: 28,
-        total: 28,
-        avgScore: 92,
-        daysLeft: 0,
-    }
-]
-
 export function TeacherAssignmentsTab() {
+    const [assignments, setAssignments] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchAssignments = async () => {
+            try {
+                const res = await fetch('/api/assignments', { 
+                    cache: 'no-store',
+                    next: { revalidate: 0 } // Force dynamic check for Next.js 13+
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        const realAssignments = data.map((a: any) => ({
+                            id: a.id,
+                            title: a.title,
+                            course: a.course,
+                            dueDate: a.dueDate ? new Date(a.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No Due Date',
+                            status: a.status,
+                            submissions: a.submissions || 0,
+                            total: a.totalStudents || 28,
+                            avgScore: null,
+                            daysLeft: a.dueDate ? Math.ceil((new Date(a.dueDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24)) : 0
+                        }));
+                        setAssignments(realAssignments);
+                    }
+                }
+            } catch (err) {
+                console.error("Assignment fetch error:", err);
+            }
+        };
+        fetchAssignments();
+    }, [])
+    const [error, setError] = useState<string>("");
+
+    useEffect(() => {
+        const fetchAssignments = async () => {
+            try {
+                const res = await fetch('/api/assignments', { cache: 'no-store' });
+                if (!res.ok) throw new Error(`Status: ${res.status}`);
+                
+                const data = await res.json();
+                console.log("Raw API Data:", data);
+                
+                if (Array.isArray(data)) {
+                    setAssignments(data);
+                } else {
+                    setError("API returned non-array");
+                }
+            } catch (err: any) {
+                console.error("Fetch error:", err);
+                setError(err.message || String(err));
+            }
+        };
+        fetchAssignments();
+    }, [])
+
     return (
-        <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            className="space-y-6"
-        >
+        <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                      <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Assignments</h2>
@@ -96,9 +118,8 @@ export function TeacherAssignmentsTab() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Assignment Cards */}
                 {assignments.map((assignment) => (
-                    <motion.div 
+                    <div 
                         key={assignment.id}
-                        variants={itemVariants} 
                         className="bg-white rounded-[2rem] border border-slate-100 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow group h-full"
                     >
                         <div>
@@ -110,9 +131,36 @@ export function TeacherAssignmentsTab() {
                                 `}>
                                     {assignment.status}
                                 </Badge>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-slate-400 hover:text-slate-900">
-                                    <MoreVertical className="w-4 h-4" />
-                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-slate-400 hover:text-slate-900">
+                                            <MoreVertical className="w-4 h-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-[160px] rounded-xl font-bold">
+                                        <DropdownMenuItem 
+                                            className="text-rose-600 focus:bg-rose-50 focus:text-rose-700 cursor-pointer" 
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                if(confirm("Are you sure? This cannot be undone.")) {
+                                                    try {
+                                                        const res = await fetch(`/api/assignments/${assignment.id}`, { method: 'DELETE' });
+                                                        if (res.ok) {
+                                                            setAssignments(prev => prev.filter(a => a.id !== assignment.id));
+                                                        } else {
+                                                            alert("Failed to delete assignment. Please try again.");
+                                                        }
+                                                    } catch (err) {
+                                                        console.error(err);
+                                                        alert("Error deleting assignment.");
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            Delete Assignment
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                             
                             <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-emerald-700 transition-colors line-clamp-2">
@@ -163,13 +211,20 @@ export function TeacherAssignmentsTab() {
                                 </Button>
                             </Link>
                         </div>
-                    </motion.div>
+                    </div>
                 ))}
+                
+                {assignments.length === 0 && (
+                    <div className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center p-12 text-center text-slate-400">
+                        <FileText className="w-12 h-12 mb-4 opacity-50" />
+                        <h3 className="text-lg font-bold text-slate-600">No Generated Assignments Found</h3>
+                        <p className="text-sm">Create a new assignment to get started.</p>
+                    </div>
+                )}
 
                 {/* Create New Placeholder Card */}
                 <Link href="/teacher/assignments/create" className="h-full">
-                    <motion.button 
-                        variants={itemVariants}
+                    <button 
                         className="w-full h-full rounded-[2rem] border-2 border-dashed border-slate-200 p-6 flex flex-col items-center justify-center text-center gap-4 hover:bg-slate-50 hover:border-emerald-200 transition-all group min-h-[300px]"
                     >
                         <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
@@ -179,9 +234,9 @@ export function TeacherAssignmentsTab() {
                             <h3 className="text-lg font-bold text-slate-900">Create Assignment</h3>
                             <p className="text-sm font-medium text-slate-500">Set up a new task or quiz</p>
                         </div>
-                    </motion.button>
+                    </button>
                 </Link>
             </div>
-        </motion.div>
+        </div>
     )
 }

@@ -73,7 +73,7 @@ export function TeacherOverviewTab() {
                                 Academic Integrity Monitor
                             </h2>
                             <p className="text-slate-500 font-medium mb-6 leading-relaxed">
-                                AI usage is within expected parameters. 3 new flags require your attention today.
+                                AI usage is within expected parameters. <span className="text-rose-600 font-bold">3 disallowed prompts blocked</span> today.
                             </p>
                             
                             <div className="flex gap-3">
@@ -90,10 +90,10 @@ export function TeacherOverviewTab() {
                         <div className="md:w-64 bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col gap-3">
                             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Safety Checks</h3>
                             {[
-                                { label: "Plagiarism Scan", status: "secure" },
-                                { label: "Bias Detection", status: "warning" },
-                                { label: "Safety Filter", status: "secure" },
-                                { label: "Prompt Injection", status: "secure" }
+                                { label: "Gemini Prompt Filter", status: "secure" },
+                                { label: "Exam Guard (Ext)", status: "secure" },
+                                { label: "Real-time Classify", status: "secure" },
+                                { label: "Hint Mode Active", status: "warning" }
                             ].map((step, i) => (
                                 <div key={i} className="flex items-center gap-3">
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold border ${
@@ -140,9 +140,9 @@ export function TeacherOverviewTab() {
                         </div>
                         <div className="space-y-4">
                             {[
-                                { time: "10m ago", title: "Write my essay request", type: "Plagiarism", color: "text-rose-500 bg-rose-50" },
-                                { time: "2h ago", title: "Biased framing detected", type: "Review", color: "text-amber-500 bg-amber-50" },
-                                { time: "4h ago", title: "Unsafe content filter", type: "Blocked", color: "text-slate-500 bg-slate-100" },
+                                { time: "10m ago", title: "Write my essay for history", type: "Disallowed", color: "text-rose-500 bg-rose-50" },
+                                { time: "2h ago", title: "Answer for Q3 please", type: "Hint_Only", color: "text-amber-500 bg-amber-50" },
+                                { time: "4h ago", title: "Weather in New York", type: "Off_Topic", color: "text-slate-500 bg-slate-100" },
                             ].map((item, i) => (
                                 <div key={i} className="flex gap-4 group">
                                     <div className="w-16 pt-1 text-xs font-bold text-slate-400 text-right group-hover:text-slate-600 transition-colors">
@@ -176,9 +176,9 @@ export function TeacherOverviewTab() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {[
-                            { title: "Prompt Diversity", type: "High", desc: "Students are exploring varied topics.", icon: MessageSquare, color: "text-purple-500 bg-purple-50" },
-                            { title: "Citation Usage", type: "Improved", desc: "20% increase in sources.", icon: FileText, color: "text-blue-500 bg-blue-50" },
-                            { title: "Time Management", type: "Stable", desc: "Consistent usage patterns.", icon: Clock, color: "text-emerald-500 bg-emerald-50" },
+                            { title: "Quiz Participation", type: "High", desc: "85% class completion rate.", icon: Trophy, color: "text-purple-500 bg-purple-50" },
+                            { title: "AI Hint Usage", type: "Moderate", desc: "Most students asking for steps.", icon: MessageSquare, color: "text-blue-500 bg-blue-50" },
+                            { title: "Avg. Integrity Score", type: "Stable", desc: "98/100 across 30 students.", icon: Shield, color: "text-emerald-500 bg-emerald-50" },
                         ].map((res, i) => (
                             <div key={i} className="p-4 rounded-2xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 hover:shadow-md transition-all cursor-pointer group">
                                 <div className={`w-10 h-10 rounded-xl ${res.color} flex items-center justify-center mb-3`}>

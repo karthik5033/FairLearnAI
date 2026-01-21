@@ -5,13 +5,34 @@ import { motion, Variants } from "framer-motion"
 import { 
     Search,
     Bell,
-    Menu
+    Menu,
+    Shield
 } from "lucide-react"
+import { useEffect } from "react"
+
 import { Logo } from "@/components/logo"
 import Link from "next/link"
 
 export function TeacherHeader() {
-    const [focusMode, setFocusMode] = useState(false)
+    const [examMode, setExamMode] = useState(false)
+
+    useEffect(() => {
+        // Fetch current state
+        fetch('/api/exam-mode')
+            .then(res => res.json())
+            .then(data => setExamMode(data.examMode))
+    }, [])
+
+    const toggleExamMode = async () => {
+        const nextMode = !examMode
+        setExamMode(nextMode)
+        await fetch('/api/exam-mode', {
+            method: 'POST',
+            body: JSON.stringify({ mode: nextMode }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+    }
+
 
     return (
         <header className="fixed top-4 z-40 w-full px-4 sm:px-6 lg:px-8 pointer-events-none">
@@ -38,21 +59,24 @@ export function TeacherHeader() {
                     </div>
 
                     <div className="flex items-center gap-3 sm:gap-4">
-                            <div className="hidden md:flex items-center gap-2 bg-slate-50 p-1.5 rounded-full border border-slate-100 shadow-inner">
-                            <span className={`text-[11px] font-bold px-3 transition-colors ${focusMode ? 'text-emerald-600' : 'text-slate-500'}`}>
-                                Focus
+                             <div className="hidden md:flex items-center gap-2 bg-slate-50 p-1.5 rounded-full border border-slate-100 shadow-inner">
+                            <span className={`text-[11px] font-bold px-3 transition-colors ${examMode ? 'text-red-600' : 'text-slate-500'}`}>
+                                Exam Mode
                             </span>
                             <button 
-                                onClick={() => setFocusMode(!focusMode)}
-                                className={`w-10 h-6 rounded-full p-0.5 transition-all duration-300 ${focusMode ? 'bg-emerald-500 shadow-md' : 'bg-slate-300'}`}
+                                onClick={toggleExamMode}
+                                className={`w-10 h-6 rounded-full p-0.5 transition-all duration-300 ${examMode ? 'bg-red-500 shadow-md shadow-red-500/20' : 'bg-slate-300'}`}
                             >
                                 <motion.div 
-                                    className="w-5 h-5 bg-white rounded-full shadow-sm"
-                                    animate={{ x: focusMode ? 16 : 0 }}
+                                    className="w-5 h-5 bg-white rounded-full shadow-sm flex items-center justify-center"
+                                    animate={{ x: examMode ? 16 : 0 }}
                                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                />
+                                >
+                                    {examMode && <Shield className="w-2.5 h-2.5 text-red-500" />}
+                                </motion.div>
                             </button>
                         </div>
+
 
                         <button className="w-10 h-10 rounded-full bg-white hover:bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:text-emerald-600 transition-all shadow-sm relative group">
                             <Bell className="w-5 h-5 group-hover:scale-110 transition-transform" />
