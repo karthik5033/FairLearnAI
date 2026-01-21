@@ -6,7 +6,10 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import { User, Mail, Lock, ArrowRight } from 'lucide-react'
+import { User, Mail, Lock, ArrowRight, GraduationCap, School } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
 
 function LogoIcon({ className, uniColor }: { className?: string; uniColor?: boolean }) {
     return (
@@ -41,7 +44,21 @@ function LogoIcon({ className, uniColor }: { className?: string; uniColor?: bool
 }
 
 export default function SignUpPage() {
+    const router = useRouter()
+    const [role, setRole] = useState<'student' | 'teacher'>('student')
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        // Directly navigate based on role, skipping "mailing stuffs"
+        if (role === 'teacher') {
+            router.push('/teacher/dashboard')
+        } else {
+            router.push('/dashboard')
+        }
+    }
+
     return (
+
         <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 px-4 py-8">
             {/* Background Effects */}
             <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
@@ -134,7 +151,61 @@ export default function SignUpPage() {
                             </div>
                         </div>
 
-                        <form className="space-y-4">
+                        <div className="space-y-3 mb-6">
+                            <Label className="text-slate-700 font-semibold ml-1">Select Your Role</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    type="button"
+                                    onClick={() => setRole('student')}
+                                    className={cn(
+                                        "flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200 gap-2 relative overflow-hidden",
+                                        role === 'student' 
+                                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-md shadow-emerald-500/10" 
+                                            : "border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200 hover:bg-slate-100"
+                                    )}
+                                >
+                                    {role === 'student' && (
+                                        <motion.div 
+                                            layoutId="activeRole"
+                                            className="absolute inset-0 bg-emerald-500/5"
+                                            initial={false}
+                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    <GraduationCap className={cn("size-6 relative z-10", role === 'student' ? "text-emerald-600" : "text-slate-400")} />
+                                    <span className="text-sm font-bold relative z-10">Student</span>
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    type="button"
+                                    onClick={() => setRole('teacher')}
+                                    className={cn(
+                                        "flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200 gap-2 relative overflow-hidden",
+                                        role === 'teacher' 
+                                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-md shadow-emerald-500/10" 
+                                            : "border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200 hover:bg-slate-100"
+                                    )}
+                                >
+                                    {role === 'teacher' && (
+                                        <motion.div 
+                                            layoutId="activeRole"
+                                            className="absolute inset-0 bg-emerald-500/5"
+                                            initial={false}
+                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    <School className={cn("size-6 relative z-10", role === 'teacher' ? "text-emerald-600" : "text-slate-400")} />
+                                    <span className="text-sm font-bold relative z-10">Teacher</span>
+                                </motion.button>
+                            </div>
+                        </div>
+
+
+                        <form className="space-y-4" onSubmit={handleSubmit}>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="firstname" className="text-slate-700 font-semibold ml-1">Firstname</Label>
@@ -146,7 +217,6 @@ export default function SignUpPage() {
                                             type="text"
                                             placeholder="John"
                                             className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl transition-all"
-                                            required
                                         />
                                     </div>
                                 </div>
@@ -160,7 +230,6 @@ export default function SignUpPage() {
                                             type="text"
                                             placeholder="Doe"
                                             className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl transition-all"
-                                            required
                                         />
                                     </div>
                                 </div>
@@ -176,7 +245,6 @@ export default function SignUpPage() {
                                         type="email"
                                         placeholder="Enter your username"
                                         className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl transition-all"
-                                        required
                                     />
                                 </div>
                             </div>
@@ -191,7 +259,6 @@ export default function SignUpPage() {
                                         type="password"
                                         placeholder="Create a password"
                                         className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl transition-all"
-                                        required
                                     />
                                 </div>
                             </div>
