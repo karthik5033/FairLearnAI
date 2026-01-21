@@ -1,5 +1,6 @@
 import React from "react"
 import { motion, Variants } from "framer-motion"
+import Link from "next/link"
 import { 
     Clock, 
     Play, 
@@ -20,6 +21,7 @@ import {
 } from "lucide-react"
 
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
+import { AITutorWidget } from "@/components/dashboard/ai-tutor-widget"
 
 const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0, scale: 0.98 },
@@ -32,6 +34,27 @@ const itemVariants: Variants = {
 }
 
 export function OverviewTab() {
+    const [assignments, setAssignments] = React.useState<any[]>([]);
+    
+    React.useEffect(() => {
+        const fetchAssignments = async () => {
+            try {
+                const res = await fetch('/api/assignments');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        setAssignments(data);
+                    }
+                }
+            } catch ( error) {
+                console.error("Failed to fetch assignments", error);
+            }
+        };
+        fetchAssignments();
+    }, []);
+
+    const activeAssignment = assignments.length > 0 ? assignments[0] : null;
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
@@ -51,48 +74,88 @@ export function OverviewTab() {
                     <div className="relative z-10 flex flex-col md:flex-row gap-8">
                         <div className="flex-1">
                             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider mb-4 shadow-lg shadow-slate-900/20">
-                                <Clock className="w-3 h-3 text-emerald-400" /> In Progress
+                                <Clock className="w-3 h-3 text-emerald-400" /> {activeAssignment ? "Active Assignment" : "In Progress"}
                             </span>
                             
                             <h2 className="text-3xl font-bold mb-3 text-slate-900 tracking-tight leading-tight">
-                                Advanced Calculus: Limits
+                                {activeAssignment ? activeAssignment.title : "Advanced Calculus: Limits"}
                             </h2>
                             <p className="text-slate-500 font-medium mb-6 leading-relaxed">
-                                You're 75% done with Module 3. Master continuity to unlock the next quiz.
+                                {activeAssignment ? `Complete this assignment for ${activeAssignment.course}.` : "You're 75% done with Module 3. Master continuity to unlock the next quiz."}
                             </p>
                             
                             <div className="flex gap-3">
-                                <button className="flex items-center gap-2 bg-emerald-500 text-white px-6 py-3.5 rounded-xl font-bold text-sm shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:bg-emerald-600 hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5 transition-all active:scale-95">
-                                    Resume Lesson <Play className="w-4 h-4 fill-current" />
-                                </button>
+                                {activeAssignment ? (
+                                    <Link href={`/quiz/${activeAssignment.id}`}>
+                                        <button className="flex items-center gap-2 bg-emerald-500 text-white px-6 py-3.5 rounded-xl font-bold text-sm shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:bg-emerald-600 hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5 transition-all active:scale-95">
+                                            Start Quiz <Play className="w-4 h-4 fill-current" />
+                                        </button>
+                                    </Link>
+                                ) : (
+                                    <button className="flex items-center gap-2 bg-emerald-500 text-white px-6 py-3.5 rounded-xl font-bold text-sm shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:bg-emerald-600 hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5 transition-all active:scale-95">
+                                        Resume Lesson <Play className="w-4 h-4 fill-current" />
+                                    </button>
+                                )}
                                 <button className="px-6 py-3.5 rounded-xl font-bold text-sm text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
-                                    Syllabus
+                                    {activeAssignment ? "Details" : "Syllabus"}
                                 </button>
                             </div>
                         </div>
 
-                        {/* Visual Course Map */}
+                        {/* Visual Course Map or Quiz Info */}
                         <div className="md:w-64 bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col gap-3">
-                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Module Map</h3>
-                            {[
-                                { label: "Intro to Limits", status: "completed" },
-                                { label: "Epsilon-Delta", status: "completed" },
-                                { label: "Continuity", status: "current" },
-                                { label: "Derivatives Intro", status: "locked" }
-                            ].map((step, i) => (
-                                <div key={i} className="flex items-center gap-3">
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold border ${
-                                        step.status === 'completed' ? 'bg-emerald-500 border-emerald-500 text-white' :
-                                        step.status === 'current' ? 'bg-white border-emerald-500 text-emerald-500 ring-2 ring-emerald-100' :
-                                        'bg-slate-100 border-slate-200 text-slate-400'
-                                    }`}>
-                                        {step.status === 'completed' ? <CheckCircle2 className="w-3.5 h-3.5" /> : i + 1}
+                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{activeAssignment ? "Quiz Details" : "Module Map"}</h3>
+                            {activeAssignment ? (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                            <FileText className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-slate-500 uppercase">Topic</p>
+                                            <p className="text-sm font-bold text-slate-900 capitalize">{activeAssignment.quizData?.topic || "General"}</p>
+                                        </div>
                                     </div>
-                                    <span className={`text-xs font-bold ${
-                                        step.status === 'locked' ? 'text-slate-400' : 'text-slate-700'
-                                    }`}>{step.label}</span>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                            <Calendar className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-slate-500 uppercase">Due Date</p>
+                                            <p className="text-sm font-bold text-slate-900">{activeAssignment.dueDate || "No Due Date"}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                                            <Target className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-slate-500 uppercase">Questions</p>
+                                            <p className="text-sm font-bold text-slate-900">{activeAssignment.quizData?.questions?.length || 5} Questions</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            ))}
+                            ) : (
+                                [
+                                    { label: "Intro to Limits", status: "completed" },
+                                    { label: "Epsilon-Delta", status: "completed" },
+                                    { label: "Continuity", status: "current" },
+                                    { label: "Derivatives Intro", status: "locked" }
+                                ].map((step, i) => (
+                                    <div key={i} className="flex items-center gap-3">
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold border ${
+                                            step.status === 'completed' ? 'bg-emerald-500 border-emerald-500 text-white' :
+                                            step.status === 'current' ? 'bg-white border-emerald-500 text-emerald-500 ring-2 ring-emerald-100' :
+                                            'bg-slate-100 border-slate-200 text-slate-400'
+                                        }`}>
+                                            {step.status === 'completed' ? <CheckCircle2 className="w-3.5 h-3.5" /> : i + 1}
+                                        </div>
+                                        <span className={`text-xs font-bold ${
+                                            step.status === 'locked' ? 'text-slate-400' : 'text-slate-700'
+                                        }`}>{step.label}</span>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </motion.div>
@@ -117,34 +180,36 @@ export function OverviewTab() {
                     >
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500">
-                                    <Calendar className="w-4 h-4" />
+                                <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                    <FileText className="w-4 h-4" />
                                     </div>
-                                <h3 className="text-base font-bold text-slate-800">Today's Schedule</h3>
+                                <h3 className="text-base font-bold text-slate-800">Your Assignments</h3>
                             </div>
                             <button className="text-xs font-bold text-slate-400 hover:text-slate-600">View All</button>
                         </div>
                         <div className="space-y-4">
-                            {[
-                                { time: "10:00 AM", title: "Live Session: Physics", type: "Live", color: "text-rose-500 bg-rose-50" },
-                                { time: "02:00 PM", title: "Assignment Due", type: "Deadline", color: "text-orange-500 bg-orange-50" },
-                                { time: "04:30 PM", title: "Group Study", type: "Meet", color: "text-blue-500 bg-blue-50" },
-                            ].map((item, i) => (
-                                <div key={i} className="flex gap-4 group">
+                            {assignments.length > 0 ? assignments.map((assignment, i) => (
+                                <div key={assignment.id} className="flex gap-4 group">
                                     <div className="w-16 pt-1 text-xs font-bold text-slate-400 text-right group-hover:text-slate-600 transition-colors">
-                                        {item.time}
+                                        {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : 'No Date'}
                                     </div>
                                     <div className="flex-1 pb-4 border-l-2 border-slate-100 pl-4 relative last:border-0 last:pb-0">
                                         <div className={`absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full border-2 border-white ring-2 ring-slate-100 bg-white group-hover:bg-slate-300 transition-colors`} />
-                                        <div className={`p-3 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:shadow-md transition-all`}>
-                                            <p className="text-sm font-bold text-slate-800">{item.title}</p>
-                                            <span className={`inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${item.color}`}>
-                                                {item.type}
+                                        <div className={`p-3 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:shadow-md transition-all cursor-pointer`}>
+                                            <p className="text-sm font-bold text-slate-800">{assignment.title}</p>
+                                            <span className={`inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                                i % 2 === 0 ? 'text-orange-500 bg-orange-50' : 'text-blue-500 bg-blue-50'
+                                            }`}>
+                                                {assignment.status || "Assigned"}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                            )) : (
+                                <div className="text-center py-8 text-slate-400">
+                                    <p>No active assignments.</p>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 </div>
@@ -261,32 +326,7 @@ export function OverviewTab() {
                 </motion.div>
 
                 {/* AI Tutor Widget */}
-                <motion.div 
-                    variants={itemVariants} 
-                    className="bg-white rounded-[2rem] border border-slate-100 p-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
-                >
-                    <div className="bg-slate-50 rounded-[1.5rem] p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-200">
-                                <Bot className="w-4 h-4" />
-                            </div>
-                            <p className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-md">Online</p>
-                        </div>
-                        <p className="text-sm font-medium text-slate-600 leading-relaxed mb-4">
-                            "I've found a great article to help with <span className="font-bold text-slate-900">Derivatives</span>. Want to see it?"
-                        </p>
-                    </div>
-                    <div className="p-2 gap-2 flex">
-                        <input 
-                            type="text" 
-                            placeholder="Ask a question..." 
-                            className="flex-1 bg-white border border-slate-100 rounded-full px-4 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                        />
-                        <button className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-slate-700 transition-colors">
-                            <ChevronRight className="w-4 h-4" />
-                        </button>
-                    </div>
-                </motion.div>
+                <AITutorWidget />
 
             </motion.div>
         </div>

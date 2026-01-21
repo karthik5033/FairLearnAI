@@ -1,5 +1,5 @@
-import React from "react"
-import { motion, Variants } from "framer-motion"
+import React, { useState } from "react"
+import { motion, AnimatePresence, Variants } from "framer-motion"
 import { 
     Play, 
     Clock, 
@@ -8,8 +8,13 @@ import {
     BookOpen,
     Code,
     Cpu,
-    FlaskConical
+    FlaskConical,
+    BrainCircuit,
+    X
 } from "lucide-react"
+import { QuizCreator } from "@/components/quiz/quiz-creator"
+import { QuizCard } from "@/components/quiz/quiz-card"
+import { Quiz } from "@/lib/ai/quiz-generator"
 
 const courses = [
     { 
@@ -93,8 +98,69 @@ const itemVariants: Variants = {
 }
 
 export function CoursesTab() {
+    const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
+    const [showQuizCreator, setShowQuizCreator] = useState(false);
+
     return (
         <div className="space-y-8">
+
+            {/* AI Practice Mode Section */}
+            <motion.div variants={itemVariants} className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-xl shadow-slate-900/20">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none" />
+                
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-bold mb-4 backdrop-blur-sm">
+                            <BrainCircuit className="w-3.5 h-3.5" /> AI Practice Mode
+                        </div>
+                        <h2 className="text-3xl font-bold mb-2 text-white">Challenge Your Knowledge</h2>
+                        <p className="text-slate-400 font-medium max-w-lg leading-relaxed">
+                            Generate a custom quiz on any topic instantly. Test your skills, earn XP, and master your subjects with AI-powered questions.
+                        </p>
+                    </div>
+                    <button 
+                        onClick={() => setShowQuizCreator(true)}
+                        className="bg-white text-slate-900 px-8 py-4 rounded-2xl font-bold shadow-lg shadow-black/10 hover:bg-emerald-50 transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
+                    >
+                        Create Practice Quiz
+                    </button>
+                </div>
+
+                {/* Quiz Modal / Overlay */}
+                <AnimatePresence>
+                    {showQuizCreator && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                className="relative w-full max-w-4xl h-[600px] flex gap-4"
+                            >
+                                <button 
+                                    onClick={() => { setShowQuizCreator(false); setActiveQuiz(null); }}
+                                    className="absolute -top-12 right-0 text-white/80 hover:text-white transition-colors flex items-center gap-2 font-medium"
+                                >
+                                    Close <div className="p-1 bg-white/10 rounded-full"><X className="w-4 h-4" /></div>
+                                </button>
+
+                                <div className="flex-1 h-full">
+                                    {activeQuiz ? (
+                                        <QuizCard 
+                                            quiz={activeQuiz} 
+                                            onReset={() => setActiveQuiz(null)} 
+                                        />
+                                    ) : (
+                                        <QuizCreator 
+                                            onQuizGenerated={(quiz) => setActiveQuiz(quiz)} 
+                                        />
+                                    )}
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+            </motion.div>
             
             {/* My Courses Section */}
             <motion.div variants={itemVariants} className="space-y-6">
