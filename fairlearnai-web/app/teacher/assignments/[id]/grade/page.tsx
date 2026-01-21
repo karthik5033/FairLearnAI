@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, use } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
     ArrowLeft, 
@@ -27,7 +27,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { TeacherHeader } from "@/components/teacher-dashboard/header"
 
-export default function GradingPage({ params }: { params: { id: string } }) {
+export default function GradingPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const [currentStudentIndex, setCurrentStudentIndex] = useState(0)
     const [score, setScore] = useState(85)
     const [isAiAnalysisOpen, setIsAiAnalysisOpen] = useState(true)
@@ -55,7 +56,7 @@ export default function GradingPage({ params }: { params: { id: string } }) {
             {/* Condensed Header */}
             <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm z-20">
                 <div className="flex items-center gap-4">
-                    <Link href={`/teacher/assignments/${params.id}`} className="text-slate-500 hover:text-slate-900 transition-colors">
+                    <Link href={`/teacher/assignments/${id}`} className="text-slate-500 hover:text-slate-900 transition-colors">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
                     <div className="h-6 w-[1px] bg-slate-200" />

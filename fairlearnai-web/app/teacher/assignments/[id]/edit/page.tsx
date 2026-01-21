@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, use, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { 
@@ -20,18 +20,37 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export default function EditAssignmentPage({ params }: { params: { id: string } }) {
+export default function EditAssignmentPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     
     // Mock existing data
     const [formData, setFormData] = useState({
-        title: "Ethics in AI: Case Study Analysis",
-        course: "cs305",
-        description: "Analyze the provided case study regarding autonomous vehicle decision making. Discuss the ethical implications using the frameworks covered in class.",
-        dueDate: "2024-10-24",
+        title: "",
+        course: "",
+        description: "",
+        dueDate: "",
         points: "100"
     })
+
+    useEffect(() => {
+        if (!id || id.startsWith('mock-')) return;
+        const fetchIt = async () => {
+            const res = await fetch(`/api/assignments/${id}`);
+            if (res.ok) {
+                const data = await res.json();
+                setFormData({
+                    title: data.title || "",
+                    course: data.course?.split(":")[0].trim().toLowerCase().replace(" ", "") || "",
+                    description: data.description || "",
+                    dueDate: data.dueDate || "",
+                    points: "100" // DB doesn't have points yet
+                });
+            }
+        };
+        fetchIt();
+    }, [id]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target
@@ -49,7 +68,7 @@ export default function EditAssignmentPage({ params }: { params: { id: string } 
         setTimeout(() => {
             setIsLoading(false)
             // Redirect back to assignment details
-            router.push(`/teacher/assignments/${params.id}`)
+            router.push(`/teacher/assignments/${id}`)
         }, 1500)
     }
 
@@ -67,7 +86,7 @@ export default function EditAssignmentPage({ params }: { params: { id: string } 
                 transition={{ duration: 0.5 }}
             >
                 <div className="mb-8">
-                    <Link href={`/teacher/assignments/${params.id}`} className="inline-flex items-center text-slate-500 hover:text-slate-900 font-bold text-sm mb-4 transition-colors">
+                    <Link href={`/teacher/assignments/${id}`} className="inline-flex items-center text-slate-500 hover:text-slate-900 font-bold text-sm mb-4 transition-colors">
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Back to Assignment
                     </Link>
@@ -184,7 +203,7 @@ export default function EditAssignmentPage({ params }: { params: { id: string } 
                         </div>
 
                         <div className="pt-4 flex items-center justify-end gap-4">
-                            <Link href={`/teacher/assignments/${params.id}`}>
+                            <Link href={`/teacher/assignments/${id}`}>
                                 <Button type="button" variant="outline" className="rounded-xl border-slate-200 font-bold text-slate-600">
                                     Cancel
                                 </Button>
