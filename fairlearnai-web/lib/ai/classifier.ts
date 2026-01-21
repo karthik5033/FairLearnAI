@@ -14,8 +14,14 @@ const DISALLOWED_KEYWORDS = [
     "entire paper",
     "only answers no explanation",
     "do my homework",
-    "write the essay for me",
-    "full solution"
+    "write the essay",
+    "write an essay",
+    "write a essay",
+    "essay",
+    "summary",
+    "full solution",
+    "get me the answer",
+    "generate an essay"
 ];
 
 const HINT_ONLY_KEYWORDS = [
