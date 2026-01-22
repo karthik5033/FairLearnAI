@@ -9,7 +9,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
         }
 
-        const result = classifyPrompt(prompt);
+        const result = await classifyPrompt(prompt);
 
         return NextResponse.json(result);
     } catch (error) {

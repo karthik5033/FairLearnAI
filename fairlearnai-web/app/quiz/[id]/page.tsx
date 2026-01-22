@@ -46,6 +46,35 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
     const [score, setScore] = useState(0);
     const [timeRemaining, setTimeRemaining] = useState(900); // 15 minutes in seconds
     const [quizStarted, setQuizStarted] = useState(false);
+    const [extensionActive, setExtensionActive] = useState(false);
+
+    useEffect(() => {
+        const checkExtension = () => {
+             // Check for the marker element injected by content script
+             const marker = document.getElementById('fairness-guard-installed');
+             if (marker) {
+                 setExtensionActive(true);
+             } else {
+                 setExtensionActive(false); // Update state if disconnected
+             }
+        };
+        
+        // Initial check
+        checkExtension();
+        
+        // Listen for event
+        window.addEventListener('FAIRNESS_GUARD_DETECTED', checkExtension);
+        
+        // Polling fallback
+        const interval = setInterval(checkExtension, 1000);
+
+        return () => {
+            window.removeEventListener('FAIRNESS_GUARD_DETECTED', checkExtension);
+            clearInterval(interval);
+        };
+    }, []);
+
+
 
     useEffect(() => {
         const fetchAssignment = async () => {
@@ -68,14 +97,66 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
     }, [id]);
 
     // Timer Effect
+
+    // Persistence Key
+    const STORAGE_KEY = `quiz_state_${id}`;
+
+    // Load State on Mount
+    useEffect(() => {
+        const savedState = localStorage.getItem(STORAGE_KEY);
+        if (savedState) {
+            try {
+                const data = JSON.parse(savedState);
+                if (data.quizStarted && !data.showResults) {
+                    setQuizStarted(true);
+                    setAnswers(data.answers || {});
+                    setCurrentQuestionIndex(data.currentQuestionIndex || 0);
+                    // Calculate real remaining time based on target end time
+                    if (data.targetEndTime) {
+                        const remaining = Math.floor((data.targetEndTime - Date.now()) / 1000);
+                        setTimeRemaining(remaining > 0 ? remaining : 0);
+                    } else {
+                        setTimeRemaining(data.timeRemaining || 900);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to restore quiz state", e);
+            }
+        }
+    }, [id]);
+
+    // Save State on Update
+    useEffect(() => {
+        if (quizStarted && !showResults) {
+            // If we don't have a target end time yet, set it
+            let target = localStorage.getItem(`${STORAGE_KEY}_target`);
+            let targetTime = target ? parseInt(target) : Date.now() + (timeRemaining * 1000);
+            
+            if (!target) {
+                localStorage.setItem(`${STORAGE_KEY}_target`, targetTime.toString());
+            }
+
+            const state = {
+                quizStarted,
+                answers,
+                currentQuestionIndex,
+                timeRemaining,
+                targetEndTime: targetTime,
+                showResults: false
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+    }, [quizStarted, answers, currentQuestionIndex, timeRemaining, showResults, id]);
+
+    // Timer Effect
     useEffect(() => {
         if (!quizStarted || showResults) return;
-        
+
         const timer = setInterval(() => {
-            setTimeRemaining(prev => {
+            setTimeRemaining((prev) => {
                 if (prev <= 1) {
                     clearInterval(timer);
-                    handleSubmit();
+                    handleSubmit(); // Auto-submit
                     return 0;
                 }
                 return prev - 1;
@@ -107,6 +188,10 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
     const handleSubmit = async () => {
         if (!assignment?.quizData?.questions) return;
         
+        // Clear persistence
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(`${STORAGE_KEY}_target`);
+
         // Calculate Score
         let calculatedScore = 0;
         assignment.quizData.questions.forEach((q: any, idx: number) => {
@@ -143,6 +228,29 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // Security Lock Effect
+    if (quizStarted && !extensionActive) {
+        return (
+            <div className="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6">
+                 <div className="w-20 h-20 bg-red-100/10 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                     <AlertCircle className="w-10 h-10 text-red-500" />
+                 </div>
+                 <h1 className="text-3xl font-bold text-white mb-4">Quiz Paused: Security Alert</h1>
+                 <p className="text-slate-300 max-w-md mb-8 text-lg">
+                     The Fairness Guard extension was disconnected. To ensure academic integrity, 
+                     you must re-enable the extension to continue.
+                 </p>
+                 <div className="p-4 bg-slate-800 rounded-xl border border-slate-700 text-left w-full max-w-sm">
+                     <div className="flex items-center gap-3 mb-2">
+                         <div className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                         <span className="text-slate-300 font-mono text-sm">Connection Lost</span>
+                     </div>
+                     <p className="text-slate-400 text-xs">Waiting for extension signal...</p>
+                 </div>
+            </div>
+        )
+    }
+
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -165,6 +273,23 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
     const questions = assignment.quizData?.questions || [];
     const currentQuestion = questions[currentQuestionIndex];
     const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+    const handleInstall = () => {
+        // In a real app, this would open the Chrome Web Store
+        // For local dev/demo, we download the zip
+        const link = document.createElement('a');
+        link.href = '/fairness-guard.zip';
+        link.download = 'fairness-guard.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast.info("1. Unzip the file");
+        toast.info("2. Go to chrome://extensions -> Load Unpacked");
+        
+        // Optional: Check again in a few seconds just in case
+        setTimeout(() => window.location.reload(), 10000);
+    }
 
     // --- Intro Screen ---
     if (!quizStarted) {
@@ -195,25 +320,66 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
                             </li>
                             <li className="flex items-start gap-2">
                                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                                <span>You can navigate back and forth between questions.</span>
+                                <span>Results will be calculated immediately after submission.</span>
                             </li>
                              <li className="flex items-start gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                                <span>Results will be calculated immediately after submission.</span>
+                                <AlertCircle className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
+                                <span>Fairness Guard extension must be active.</span>
                             </li>
                         </ul>
                     </div>
+
+                    {!extensionActive ? (
+                        <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-6 mb-6 text-left shadow-lg relative overflow-hidden">
+                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10" />
+                             
+                             <div className="flex items-start gap-4 relative z-10">
+                                 <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                     <AlertCircle className="w-5 h-5 text-emerald-400" />
+                                 </div>
+                                 <div>
+                                     <h4 className="font-bold text-white text-base mb-1">Extension Required</h4>
+                                     <p className="text-indigo-100 text-xs leading-relaxed mb-3">
+                                         To ensure academic integrity, please install the Fairness Guard extension.
+                                     </p>
+                                     <button 
+                                        onClick={handleInstall}
+                                        className="text-xs font-bold bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-900/20"
+                                     >
+                                         Install Fairness Guard
+                                     </button>
+                                 </div>
+                             </div>
+                        </div>
+                    ) : (
+                         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6 text-left flex items-center gap-3">
+                             <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                             <div>
+                                 <h4 className="font-bold text-emerald-900 text-sm">Action Completed</h4>
+                                 <p className="text-emerald-700 text-xs">Fairness Guard is active and ready.</p>
+                             </div>
+                        </div>
+                    )}
 
                     <div className="flex gap-3">
                          <Link href="/dashboard" className="flex-1">
                             <Button variant="outline" className="w-full h-12 rounded-xl font-bold">Cancel</Button>
                         </Link>
-                        <Button 
-                            className="flex-1 h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
-                            onClick={() => setQuizStarted(true)}
-                        >
-                            Start Quiz
-                        </Button>
+                        {extensionActive ? (
+                            <Button 
+                                className="flex-1 h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
+                                onClick={() => setQuizStarted(true)}
+                            >
+                                Start Quiz
+                            </Button>
+                        ) : (
+                             <Button 
+                                disabled
+                                className="flex-1 h-12 rounded-xl font-bold bg-slate-100 text-slate-400 cursor-not-allowed"
+                            >
+                                Waiting for Installation...
+                            </Button>
+                        )}
                     </div>
                  </motion.div>
             </div>

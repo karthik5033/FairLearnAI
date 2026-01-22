@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Fairness Guard",
+  "version": "1.0",
+  "description": "Stop unfair AI use and promote better learning habits.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://claude.ai/*",
+    "https://copilot.microsoft.com/*",
+    "https://www.bing.com/*",
+    "https://quillbot.com/*",
+    "http://localhost:3000/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "assets/icon.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*", 
+        "https://gemini.google.com/*", 
+        "https://www.perplexity.ai/*",
+        "https://claude.ai/*",
+        "https://copilot.microsoft.com/*",
+        "https://www.bing.com/*",
+        "https://quillbot.com/*",
+        "http://localhost:3000/*"
+      ],
+      "js": ["content-script.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

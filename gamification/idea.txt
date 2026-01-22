@@ -1,0 +1,110 @@
+AI Gamified Quiz Creation — “Adaptive Challenge Engine”
+
+This is your core product loop:
+practice → quiz → reward → improvement → practice again
+
+✅ Goal
+
+Generate quizzes that:
+
+match student level
+
+improve weak topics
+
+feel like a game (not boring exam)
+
+✅ Types of quizzes you will support
+🟣 A) Teacher-generated quiz
+
+Teacher chooses:
+
+chapter/topic
+
+number of Qs
+
+difficulty
+
+exam/practice mode
+
+AI generates quiz set automatically.
+
+🔵 B) Student adaptive quiz (smartest)
+
+System checks student performance:
+
+Example:
+
+“Trigonometry accuracy = 42%”
+
+“Time per Q = high”
+
+“Wrong repeatedly in identities”
+
+So AI creates:
+✅ 5 easy identity questions
+✅ 3 medium transformation questions
+✅ 2 application problems
+
+This makes your app feel “personal”.
+
+✅ Gamification mechanics (must have)
+🎯 XP System
+
+correct answer → +10 XP
+
+no hint used → +5 bonus
+
+streak maintained → +20/day
+
+🔥 Streak System
+
+daily streak rewards
+
+resets if inactive
+
+🏆 Badges
+
+“3-day streak”
+
+“No hints master”
+
+“Perfect score”
+
+📈 Level System
+
+level based on XP
+
+unlock tougher quizzes at higher levels
+
+✅ Quiz engine flow (MVP)
+student starts quiz
+  ↓
+quiz served (AI-generated OR teacher-created)
+  ↓
+student answers
+  ↓
+system evaluates
+  ↓
+rewards: XP + badge + progress update
+  ↓
+analytics update: weak topics + improvement
+
+💡 Add-on innovations (make it win)
+
+🔥 “Boss Fight Quiz”
+After completing lessons in a chapter:
+
+unlock final challenge quiz
+
+big XP reward
+
+🔥 “Hint Tokens”
+Every student gets limited hint tokens.
+Using hints costs tokens → increases fairness.
+
+🔥 “Mistake Replay Mode”
+AI generates a quiz ONLY on mistakes:
+
+exactly the concepts they got wrong
+
+spaced repetition built-in

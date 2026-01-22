@@ -1,0 +1,179 @@
+To build the AI Chatbot with Prompt Filter Safety, you NEED a backend layer (even if your app is Next.js) because you must NOT let the frontend directly hit the AI model.
+If students can call the LLM directly → they can bypass your rules → game over.
+
+So the architecture is:
+
+✅ Frontend Chat UI → ✅ Backend AI Gateway → ✅ Prompt Filter Model → ✅ Policy + Rewrite → ✅ LLM → ✅ Response back
+
+✅ What backend do we need? (Simple and clean)
+
+Since you're already using Next.js, the best approach is:
+
+✅ Use Next.js API Routes (built-in backend)
+
+You don’t need a separate backend server in the beginning.
+
+Create endpoints like:
+
+POST /api/ai/classify
+
+POST /api/ai/chat
+
+This is enough for a prototype + demo.
+
+🧠 The Prompt Filter Model (what it should do)
+
+This model recognizes intent and decides if the student is trying to cheat.
+
+Labels:
+
+ALLOWED
+
+HINT_ONLY
+
+DISALLOWED
+
+OFF_TOPIC
+
+Example classification:
+
+Student Prompt	Label
+“Explain BFS and DFS difference”	ALLOWED
+“Solve this entire integration question”	HINT_ONLY
+“Give final answers only”	DISALLOWED
+“Tell me a joke”	OFF_TOPIC
+🔥 Best Practical Approach (highest accuracy + easiest build)
+
+You have 2 ways:
+
+✅ Option 1 (BEST for now): Hybrid filter = Model + Rules
+
+This gives high accuracy without training a huge model.
+
+Step 1: Rule-based fast check (instant)
+
+Detect obvious cheating phrases:
+
+"final answer"
+
+"give me the solution"
+
+"solve completely"
+
+"answer key"
+
+"entire paper"
+
+"only answers no explanation"
+
+If found → directly DISALLOWED ✅
+
+Step 2: If not obvious → run small ML classifier
+
+TF-IDF + Logistic Regression
+
+outputs label + confidence
+
+Step 3: If confidence is low → fallback to LLM classifier
+
+(only for edge cases)
+
+This hybrid setup is 🔥 very accurate.
+
+🏗️ Backend Flow (exact logic)
+
+When student sends message:
+
+✅ Step-by-step pipeline
+
+Receive prompt from frontend
+
+Run classifier → get label
+
+Apply teacher policy rules (exam mode etc.)
+
+If label = HINT_ONLY → rewrite prompt
+
+Send safe prompt to LLM
+
+Guard output so it doesn’t leak final answers
+
+Return response + label to frontend
+
+🔐 Safety Rules (must-have)
+
+Even if the prompt is safe, the LLM might output a full answer.
+So we add response guard.
+
+Example “Hint Mode” Safe System Prompt
+
+You are a tutor. Provide hints and steps only. Do not give final answer.
+
+This is 10x safer than just rewriting prompts.
+
+✅ The 2 API Routes you need (minimum)
+1️⃣ /api/ai/classify
+
+Purpose: just classification (optional)
+Input:
+
+{ "prompt": "solve this full question" }
+
+
+Output:
+
+{ "label": "HINT_ONLY", "confidence": 0.81 }
+
+2️⃣ /api/ai/chat
+
+Purpose: full chat pipeline
+Input:
+
+{
+  "prompt": "solve this derivative question",
+  "mode": "practice",
+  "userRole": "student"
+}
+
+
+Output:
+
+{
+  "label": "HINT_ONLY",
+  "answer": "Start by identifying the rule..."
+}
+
+💾 Where to store data? (local-first)
+
+For prototype:
+✅ Store chat history in browser (localStorage/IndexedDB)
+
+Backend only stores:
+
+blocked prompt count (optional)
+
+analytics (optional)
+
+No external DB required.
+
+✅ What you should build NOW (sequence)
+
+This is the correct order:
+
+✅ Step A: Create /api/ai/chat
+
+Hardcode:
+
+exam mode = false
+
+filter rules basic
+
+✅ Step B: Add prompt classification (rule-based)
+
+Use keywords → DISALLOWED / HINT_ONLY
+
+✅ Step C: Add ML model later
+
+TF-IDF + Logistic Regression trained model
+
+Start with rules first because it works instantly.

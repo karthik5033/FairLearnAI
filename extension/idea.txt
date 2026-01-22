@@ -1,0 +1,101 @@
+1) 🧩 Browser Extension — “Fairness Guard”
+✅ Goal
+
+Stop students from using AI unfairly outside your app (ChatGPT, Gemini, etc.)
+or at least detect and block/limit cheating prompts.
+
+This is your “WOW” feature.
+
+🔥 What the extension actually does
+
+The extension acts like a gatekeeper:
+
+✅ It reads the prompt typed by the student
+✅ It sends the prompt to your FairLearnAI backend
+✅ Your backend classifies it as:
+
+ALLOWED
+
+HINT_ONLY
+
+DISALLOWED
+
+OFF_TOPIC
+
+✅ Then the extension:
+
+Allows it
+
+Rewrites it to a safe version
+
+Blocks it completely
+
+✅ Core features (Extension MVP)
+✅ Feature A: Prompt Interceptor
+
+Extension detects text in:
+
+ChatGPT input box
+
+Gemini input box
+
+Copilot chat input (optional)
+
+Any textarea (general mode)
+
+It basically monitors input + blocks “cheating intent” prompts.
+
+✅ Feature B: Block + Rewrite UI
+
+If student types:
+
+“Give me final answers for this paper”
+
+It shows a pop-up like:
+✅ Blocked (Exam Mode)
+Reason: Direct answers not allowed
+Try: “Give me hints only”
+
+OR it auto converts prompt to:
+
+“Give step-by-step hints only, no final answers”
+
+✅ Feature C: “Exam Mode Toggle”
+
+A teacher can enable exam mode in the platform → extension automatically becomes strict.
+
+That looks insane in demo:
+
+Teacher clicks: ✅ “Exam Mode ON”
+Student tries ChatGPT → ❌ blocked
+
+💡 Add-on features (extension power-ups)
+
+🔥 Fairness Score Tracking
+
+counts blocked prompts
+
+tracks attempts per minute
+
+gives integrity rating
+
+🔥 Whitelist Mode
+Allow only:
+
+definitions
+
+hints
+
+explanations
+
+🔥 Website Lock
+Only allow AI use on “FairLearnAI site” during exam mode.
+
+✅ Extension architecture (simple)
+content script reads prompt
+      ↓
+sends to backend /api/ai/classifyPrompt
+      ↓
+backend returns label + safe rewrite
+      ↓
+extension blocks OR replaces OR allows

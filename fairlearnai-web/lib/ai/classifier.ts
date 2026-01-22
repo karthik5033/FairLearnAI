@@ -44,8 +44,30 @@ const OFF_TOPIC_KEYWORDS = [
     "game"
 ];
 
-export function classifyPrompt(prompt: string): ClassificationResult {
+export async function classifyPrompt(prompt: string): Promise<ClassificationResult> {
     const lowerPrompt = prompt.toLowerCase();
+
+    // 0. Try Custom ML Model (FastAPI)
+    try {
+        const response = await fetch('http://localhost:8000/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt }),
+            signal: AbortController.timeout(1000) // 1s timeout
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            return {
+                label: data.label as ClassificationLabel,
+                confidence: data.confidence,
+                reason: data.reason
+            };
+        }
+    } catch (e) {
+        // ML Model offline, fall back to rules
+        // console.warn("ML Service unavailable:", e);
+    }
 
     // 1. Check for Disallowed Keywords (High Priority)
     for (const keyword of DISALLOWED_KEYWORDS) {
