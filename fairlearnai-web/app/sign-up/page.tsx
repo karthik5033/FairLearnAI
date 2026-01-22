@@ -47,9 +47,19 @@ export default function SignUpPage() {
     const router = useRouter()
     const [role, setRole] = useState<'student' | 'teacher'>('student')
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        // Directly navigate based on role, skipping "mailing stuffs"
+        
+        // Extract form data
+        const formData = new FormData(e.currentTarget)
+        const firstname = formData.get('firstname') as string
+        
+        // Store user info in localStorage
+        if (firstname) {
+            localStorage.setItem('userFirstName', firstname)
+        }
+        
+        // Navigate based on role
         if (role === 'teacher') {
             router.push('/teacher/dashboard')
         } else {
