@@ -9,8 +9,10 @@ import {
     Brain,
     Coins,
     Sparkles,
-    Shield
+    Shield,
+    Atom
 } from "lucide-react"
+import Link from "next/link"
 
 const stats = [
     { id: "xp", label: "Current XP", value: "...", icon: Zap, color: "text-amber-500", bg: "bg-amber-50" },
@@ -26,7 +28,8 @@ const activities = [
         reward: "+50 XP",
         type: "Adaptive",
         icon: Brain,
-        color: "indigo"
+        color: "indigo",
+        link: "/gamification/adaptive-math"
     },
     { 
         title: "Daily Challenge", 
@@ -34,7 +37,8 @@ const activities = [
         reward: "+20 XP",
         type: "Daily",
         icon: Target,
-        color: "emerald"
+        color: "emerald",
+        link: "/gamification/daily-challenge"
     },
     { 
         title: "Boss Fight: Limits", 
@@ -42,7 +46,17 @@ const activities = [
         reward: "+200 XP",
         type: "Boss",
         icon: Sparkles,
-        color: "violet"
+        color: "violet",
+        link: "/gamification/boss-fight"
+    },
+    { 
+        title: "Physics Lab: Motion", 
+        desc: "Master Kinematics in 3D",
+        reward: "+80 XP",
+        type: "Simulation",
+        icon: Atom,
+        color: "rose",
+        link: "/gamification/physics-lab"
     }
 ]
 
@@ -140,9 +154,11 @@ export function GamificationTab() {
                                     </div>
                                 </div>
 
-                                <button className={`px-6 py-3 rounded-xl bg-slate-900 text-white text-xs font-bold flex items-center gap-2 group-hover:bg-indigo-600 transition-all shadow-lg active:scale-95`}>
-                                    Start Now <ArrowRight className="w-4 h-4" />
-                                </button>
+                                <Link href={act.link}>
+                                    <button className={`px-6 py-3 rounded-xl bg-slate-900 text-white text-xs font-bold flex items-center gap-2 group-hover:bg-indigo-600 transition-all shadow-lg active:scale-95`}>
+                                        Start Now <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                </Link>
                             </motion.div>
                         ))}
                     </div>

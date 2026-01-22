@@ -42,9 +42,15 @@ export default function DashboardPage() {
     const [focusMode, setFocusMode] = useState(false)
     const [mounted, setMounted] = useState(false)
     const [activeTab, setActiveTab] = useState("overview")
+    const [userName, setUserName] = useState("Student")
 
     useEffect(() => {
         setMounted(true)
+        // Load user's name from localStorage
+        const storedName = localStorage.getItem('userFirstName')
+        if (storedName) {
+            setUserName(storedName)
+        }
     }, [])
 
     if (!mounted) return null
@@ -161,7 +167,7 @@ export default function DashboardPage() {
                                 <Sparkles className="w-3 h-3 fill-emerald-700" /> Weekly Report Ready
                             </div>
                             <h1 className="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">
-                                Hello, <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-600">Alex</span>
+                                Hello, <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-600">{userName}</span>
                             </h1>
                             <p className="text-slate-500 font-medium">
                                 You have 3 tasks scheduled for today.
